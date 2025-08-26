@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="Fitnes_ai.Views.WorkoutPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Fitnes_ai.Converters"
+             Shell.BackgroundColor="{StaticResource Primary}"
+             Shell.ForegroundColor="White"
+             Shell.TitleColor="White"
+             BackgroundColor="{DynamicResource BackgroundColor}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <local:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Exercise List -->
+        <CollectionView x:Name="ExercisesCollection"
+                        Grid.Row="0"
+                        ItemsSource="{Binding Exercises}"
+                        BackgroundColor="Transparent"
+                        IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}"
+                        ItemSizingStrategy="MeasureAllItems"
+                        Margin="16,8">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="0,8">
+                        <Frame BackgroundColor="#f8f9fa"
+                               CornerRadius="12"
+                               HasShadow="False"
+                               Padding="16">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Exercise Image -->
+                                <Frame Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+                                       CornerRadius="8"
+                                       HasShadow="False"
+                                       Padding="0"
+                                       BackgroundColor="#E0E0E0"
+                                       WidthRequest="50"
+                                       HeightRequest="50">
+                                    <Image Source="{Binding ExerciseData.Image, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                                           Aspect="AspectFill" />
+                                </Frame>
+
+                                <!-- Exercise Name -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding ExerciseData.Name}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#1E3A8A"
+                                       VerticalOptions="Center" />
+
+                                <!-- Delete Button -->
+                                <Button Grid.Row="0" Grid.Column="2"
+                                        Text="✕"
+                                        FontSize="16"
+                                        BackgroundColor="#dc3545"
+                                        TextColor="White"
+                                        CornerRadius="15"
+                                        WidthRequest="30"
+                                        HeightRequest="30"
+                                        Padding="0"
+                                        Command="{Binding Source={x:RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExerciseCommand}"
+                                        CommandParameter="{Binding .}" />
+
+                                <!-- Muscle Group -->
+                                <Label Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding ExerciseData.MuscleGroup}"
+                                       FontSize="14"
+                                       TextColor="#6c757d"
+                                       Margin="0,4,0,0" />
+
+                                <!-- Sets, Reps, and Rest -->
+                                <StackLayout Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                             Orientation="Horizontal"
+                                             Margin="0,8,0,0"
+                                             Spacing="16">
+                                    <Label>
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Sets: " FontAttributes="Bold" TextColor="#1E3A8A" />
+                                                <Span Text="{Binding Sets}" TextColor="#1E3A8A" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    
+                                    <Label>
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Reps: " FontAttributes="Bold" TextColor="#1E3A8A" />
+                                                <Span Text="{Binding Reps}" TextColor="#1E3A8A" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    
+                                    <Label>
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Rest: " FontAttributes="Bold" TextColor="#1E3A8A" />
+                                                <Span Text="{Binding RestTime}" TextColor="#1E3A8A" />
+                                                <Span Text="s" TextColor="#6c757d" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </StackLayout>
+                            </Grid>
+                        </Frame>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Empty State -->
+        <Grid Grid.Row="0"
+              IsVisible="{Binding IsEmpty}"
+              VerticalOptions="Center"
+              HorizontalOptions="Center">
+            <StackLayout Spacing="16">
+                <Image Source="{OnPlatform 'workout_w.svg', WinUI='Images/workout_w.svg'}"
+                       HeightRequest="64"
+                       WidthRequest="64"
+                       HorizontalOptions="Center" />
+                <Label Text="{Binding EmptyStateMessage}"
+                       FontSize="20"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
+                <Label Text="{Binding EmptyStateSubMessage}"
+                       FontSize="16"
+                       TextColor="#B0C4DE"
+                       HorizontalOptions="Center" />
+            </StackLayout>
+        </Grid>
+
+        <!-- Action Button at Bottom -->
+        <StackLayout Grid.Row="1" Padding="20,15,20,20" BackgroundColor="White">
+            <Button Text="+ Add Exercise"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="25"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    HorizontalOptions="Fill"
+                    Command="{Binding AddExerciseCommand}" />
+        </StackLayout>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Fitnes_ai.Views.ExercisesPage"
+             xmlns:viewmodels="clr-namespace:Fitnes_ai.ViewModels"
+             xmlns:converters="clr-namespace:Fitnes_ai.Converters"
+             Title="Exercises"
+             Shell.BackgroundColor="{StaticResource Primary}"
+             Shell.ForegroundColor="White"
+             Shell.TitleColor="White"
+             BackgroundColor="White">
+    
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid BackgroundColor="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Search Bar -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="White"
+               CornerRadius="12"
+               HasShadow="False"
+               BorderColor="{StaticResource Gray200}"
+               Padding="0"
+               Margin="15,15,15,8">
+            <SearchBar Placeholder="Search exercises..." 
+                       Text="{Binding SearchText}"
+                       BackgroundColor="Transparent"
+                       PlaceholderColor="{StaticResource Gray500}"
+                       TextColor="{StaticResource Gray900}"
+                       CancelButtonColor="{StaticResource Primary}" />
+        </Frame>
+
+        <!-- Filter Picker -->
+        <Frame Grid.Row="1"
+               BackgroundColor="White"
+               CornerRadius="12"
+               HasShadow="False"
+               BorderColor="{StaticResource Gray200}"
+               Padding="0"
+               Margin="15,0,15,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
+                <!-- Filter Icon -->
+                <StackLayout Grid.Column="0"
+                            Orientation="Horizontal"
+                            Padding="12,8"
+                            VerticalOptions="Center">
+                    <Image Source="filter_b.svg"
+                           WidthRequest="18"
+                           HeightRequest="18"
+                           VerticalOptions="Center" />
+                </StackLayout>
+                
+                <!-- Picker -->
+                <Picker Grid.Column="1"
+                        Title="All Muscle Groups"
+                        ItemsSource="{Binding MuscleGroups}"
+                        SelectedItem="{Binding SelectedMuscleGroup}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Gray900}"
+                        TitleColor="{StaticResource Gray500}"
+                        Margin="0,0,12,0" />
+            </Grid>
+        </Frame>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="2"
+                           IsVisible="{Binding IsLoading}"
+                           IsRunning="{Binding IsLoading}"
+                           Color="{StaticResource Primary}"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"
+                           HeightRequest="50" />
+
+        <!-- Exercises List -->
+        <CollectionView Grid.Row="2" 
+                        ItemsSource="{Binding FilteredExercises}"
+                        IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                        Margin="15,0,15,10"
+                        SelectionMode="None"
+                        RemainingItemsThreshold="5"
+                        ItemSizingStrategy="MeasureAllItems"
+                        VerticalScrollBarVisibility="Always">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="0,8">
+                        <Frame BackgroundColor="White"
+                               CornerRadius="16"
+                               HasShadow="False"
+                               BorderColor="{StaticResource Gray200}"
+                               Padding="16"
+                               Margin="0">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ExercisesViewModel}}, Path=ExerciseTappedCommand}"
+                                                      CommandParameter="{Binding}" />
+                            </Frame.GestureRecognizers>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Exercise Image -->
+                                <Frame Grid.Column="0"
+                                       WidthRequest="80" 
+                                       HeightRequest="80"
+                                       CornerRadius="12"
+                                       Padding="2"
+                                       BackgroundColor="{StaticResource Primary}"
+                                       HasShadow="False"
+                                       VerticalOptions="Center">
+                                    <Frame CornerRadius="10"
+                                           Padding="0"
+                                           BackgroundColor="White"
+                                           HasShadow="False">
+                                        <Image Source="{Binding Image, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                                               Aspect="AspectFill"
+                                               VerticalOptions="Fill"
+                                               HorizontalOptions="Fill"
+                                               IsAnimationPlaying="False">
+                                            <!-- Fallback icon if no image -->
+                                            <Image.Triggers>
+                                                <DataTrigger TargetType="Image" 
+                                                           Binding="{Binding Image}" 
+                                                           Value="{x:Null}">
+                                                    <Setter Property="Source" Value="dumbell.svg" />
+                                                    <Setter Property="Aspect" Value="AspectFit" />
+                                                </DataTrigger>
+                                            </Image.Triggers>
+                                        </Image>
+                                    </Frame>
+                                </Frame>
+
+                                <!-- Exercise Details -->
+                                <StackLayout Grid.Column="1" 
+                                           VerticalOptions="Center"
+                                           Margin="16,0,8,0">
+                                    <Label Text="{Binding Name}" 
+                                           FontSize="18" 
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Gray900}"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="2" />
+                                    <Frame BackgroundColor="{StaticResource Primary}"
+                                           CornerRadius="8"
+                                           Padding="8,4"
+                                           HasShadow="False"
+                                           HorizontalOptions="Start"
+                                           Margin="0,4,0,0">
+                                        <Label Text="{Binding MuscleGroup}" 
+                                               FontSize="12" 
+                                               FontAttributes="Bold"
+                                               TextColor="White" />
+                                    </Frame>
+                                </StackLayout>
+
+                                <!-- Arrow Indicator -->
+                                <Label Grid.Column="2"
+                                       Text="›"
+                                       FontSize="24"
+                                       TextColor="{StaticResource Gray400}"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Center"
+                                       FontAttributes="Bold" />
+                            </Grid>
+                        </Frame>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>
